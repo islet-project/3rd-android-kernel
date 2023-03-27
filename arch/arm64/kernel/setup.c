@@ -55,6 +55,7 @@
 #include <asm/hypervisor.h>
 #include <asm/xen/hypervisor.h>
 #include <asm/mmu_context.h>
+#include <asm/rsi.h>
 
 static int num_standard_resources;
 static struct resource *standard_resources;
@@ -373,6 +374,8 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 		psci_dt_init();
 	else
 		psci_acpi_init();
+
+	arm64_rsi_init();
 
 	init_bootcpu_ops();
 	smp_init_cpus();
