@@ -54,6 +54,8 @@ source "drivers/virt/coco/sev-guest/Kconfig"
 
 source "drivers/virt/coco/tdx-guest/Kconfig"
 
+source "drivers/virt/coco/arm-cca-guest/Kconfig"
+
 source "drivers/virt/geniezone/Kconfig"
 
 source "drivers/virt/gunyah/Kconfig"
