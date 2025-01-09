@@ -17,6 +17,7 @@
     <linkfile src="tools/launch_cvd.sh" dest="launch_cvd.sh" />
     <linkfile src="tools/flash_device.sh" dest="flash_device.sh" />
   </project>
+  <project path="common-modules/binder" name="kernel/common-modules/binder" revision="android16-6.12" />
   <project path="common-modules/trusty" name="kernel/common-modules/trusty" />
   <project path="common-modules/virtio-media" name="platform/external/virtio-media" />
   <project path="common-modules/virtual-device" name="kernel/common-modules/virtual-device" revision="android16-6.12" />
