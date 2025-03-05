@@ -1242,8 +1242,10 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 
 	if (run->exit_reason == KVM_EXIT_MMIO) {
 		ret = kvm_handle_mmio_return(vcpu);
-		if (ret <= 0)
+		if (ret <= 0) {
+			kvm_err("eom: kvm_handle_mmio_return(): %d \n", ret);
 			return ret;
+		}
 	}
 
 	vcpu_load(vcpu);
@@ -1332,10 +1334,13 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 		trace_kvm_entry(*vcpu_pc(vcpu));
 		guest_timing_enter_irqoff();
 
-		if (vcpu_is_rec(vcpu))
+		if (vcpu_is_rec(vcpu)) {
 			ret = kvm_rec_enter(vcpu);
-		else
+			kvm_err("eom: kvm_rec_enter(): %d \n", ret);
+		} else {
 			ret = kvm_arm_vcpu_enter_exit(vcpu);
+			kvm_err("eom: kvm_arm_vcpu_enter_exit(): %d \n", ret);
+		}
 
 		vcpu->mode = OUTSIDE_GUEST_MODE;
 		vcpu->stat.exits++;
@@ -1421,10 +1426,13 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 			ret = ARM_EXCEPTION_IL;
 		}
 
-		if (vcpu_is_rec(vcpu))
+		if (vcpu_is_rec(vcpu)) {
 			ret = handle_rec_exit(vcpu, ret);
-		else
+			kvm_err("eom: handle_rec_exit(): %d \n", ret);
+		} else {
 			ret = handle_exit(vcpu, ret);
+			kvm_err("eom: handle_exit(): %d \n", ret);
+		}
 	}
 
 	/* Tell userspace about in-kernel device output levels */

@@ -4496,16 +4496,22 @@ static long kvm_vcpu_ioctl(struct file *filp,
 	case KVM_RUN: {
 		struct pid *oldpid;
 		r = -EINVAL;
-		if (arg)
+		kvm_err("eom: KVM_RUN 1\n");
+		if (arg) {
+			kvm_err("eom: arg: %lu \n", arg);
 			goto out;
+		}
+		kvm_err("eom: KVM_RUN 2\n");
 		oldpid = rcu_access_pointer(vcpu->pid);
 		if (unlikely(oldpid != task_pid(current))) {
 			/* The thread running this VCPU changed. */
 			struct pid *newpid;
 
 			r = kvm_arch_vcpu_run_pid_change(vcpu);
-			if (r)
+			if (r) {
+				kvm_err("eom: kvm_arch_vcpu_run_pid_change(): %d \n", r);
 				break;
+			}
 
 			newpid = get_task_pid(current, PIDTYPE_PID);
 			rcu_assign_pointer(vcpu->pid, newpid);
@@ -4513,10 +4519,12 @@ static long kvm_vcpu_ioctl(struct file *filp,
 				synchronize_rcu();
 			put_pid(oldpid);
 		}
+		kvm_err("eom: KVM_RUN 3\n");
 		vcpu->wants_to_run = !READ_ONCE(vcpu->run->immediate_exit__unsafe);
 		r = kvm_arch_vcpu_ioctl_run(vcpu);
 		vcpu->wants_to_run = false;
 
+		kvm_err("eom: kvm_arch_vcpu_ioctl_run(): %d \n", r);
 		trace_kvm_userspace_exit(vcpu->run->exit_reason, r);
 		break;
 	}
