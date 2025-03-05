@@ -1261,28 +1261,37 @@ static struct kvm *kvm_create_vm(unsigned long type, const char *fdname)
 	return kvm;
 
 out_err:
+	kvm_err("eom: out_err \n");
 	kvm_destroy_vm_debugfs(kvm);
 out_err_no_debugfs:
+	kvm_err("eom: out_err_no_debugfs\n");
 	kvm_coalesced_mmio_free(kvm);
 out_no_coalesced_mmio:
+	kvm_err("eom: out_no_coalesced_mmio\n");
 #ifdef CONFIG_KVM_GENERIC_MMU_NOTIFIER
 	if (kvm->mmu_notifier.ops)
 		mmu_notifier_unregister(&kvm->mmu_notifier, current->mm);
 #endif
 out_err_no_mmu_notifier:
+	kvm_err("eom: out_err_no_mmu_notifier\n");
 	kvm_disable_virtualization();
 out_err_no_disable:
+	kvm_err("eom: out_err_no_disable\n");
 	kvm_arch_destroy_vm(kvm);
 out_err_no_arch_destroy_vm:
+	kvm_err("eom: out_err_no_arch_destroy_vm\n");
 	WARN_ON_ONCE(!refcount_dec_and_test(&kvm->users_count));
 	for (i = 0; i < KVM_NR_BUSES; i++)
 		kfree(kvm_get_bus(kvm, i));
 	kvm_free_irq_routing(kvm);
 out_err_no_irq_routing:
+	kvm_err("eom: out_err_no_irq_routing\n");
 	cleanup_srcu_struct(&kvm->irq_srcu);
 out_err_no_irq_srcu:
+	kvm_err("eom: out_err_no_irq_srcu\n");
 	cleanup_srcu_struct(&kvm->srcu);
 out_err_no_srcu:
+	kvm_err("eom: out_err_no_srcu\n");
 	kvm_arch_free_vm(kvm);
 	mmdrop(current->mm);
 	return ERR_PTR(r);
@@ -5509,20 +5518,24 @@ static int kvm_dev_ioctl_create_vm(unsigned long type)
 	struct file *file;
 
 	fd = get_unused_fd_flags(O_CLOEXEC);
-	if (fd < 0)
+	if (fd < 0) {
+		kvm_err("eom: get_unused_fd_flags() failed \n");
 		return fd;
+	}
 
 	snprintf(fdname, sizeof(fdname), "%d", fd);
 
 	kvm = kvm_create_vm(type, fdname);
 	if (IS_ERR(kvm)) {
 		r = PTR_ERR(kvm);
+		kvm_err("eom: kvm_create_vm failed \n");
 		goto put_fd;
 	}
 
 	file = anon_inode_getfile("kvm-vm", &kvm_vm_fops, kvm, O_RDWR);
 	if (IS_ERR(file)) {
 		r = PTR_ERR(file);
+		kvm_err("eom: anon_inode_getfile failed \n");
 		goto put_kvm;
 	}
 
