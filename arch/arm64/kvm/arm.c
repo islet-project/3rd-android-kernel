@@ -184,11 +184,6 @@ int kvm_arch_init_vm(struct kvm *kvm, unsigned long type)
 {
 	int ret;
 
-	if (type & ~KVM_VM_TYPE_MASK) {
-		kvm_err("eom: invalid type1: %lu\n", type);
-		return -EINVAL;
-	}
-
 	mutex_init(&kvm->arch.config_lock);
 
 #ifdef CONFIG_LOCKDEP
