@@ -249,6 +249,10 @@ static void realm_unmap_range_private(struct kvm *kvm,
 	ssize_t map_size = RME_PAGE_SIZE;
 	unsigned long next_addr, addr;
 
+	next_addr = ALIGN(start + 1, map_size);
+	kvm_err("eom: %s: start 0x%lx, end 0x%lx, next_addr 0x%lx\n",
+			__func__, start, end, next_addr);
+
 	for (addr = start; addr < end; addr = next_addr) {
 		int ret;
 
