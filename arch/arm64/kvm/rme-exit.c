@@ -156,6 +156,7 @@ int handle_rec_exit(struct kvm_vcpu *vcpu, int rec_run_ret)
 	struct realm_rec *rec = &vcpu->arch.rec;
 	u8 esr_ec = ESR_ELx_EC(rec->run->exit.esr);
 	unsigned long status, index;
+	int ret = 0;
 
 	status = RMI_RETURN_STATUS(rec_run_ret);
 	index = RMI_RETURN_INDEX(rec_run_ret);
@@ -188,16 +189,28 @@ int handle_rec_exit(struct kvm_vcpu *vcpu, int rec_run_ret)
 
 	switch (rec->run->exit.exit_reason) {
 	case RMI_EXIT_SYNC:
-		return rec_exit_handlers[esr_ec](vcpu);
+		ret = rec_exit_handlers[esr_ec](vcpu);
+		if (ret < 0)
+			kvm_err("eom: rec_exit_handlers() esr_ec: 0x%x, ret %d", (int)esr_ec, ret);
+		return ret;
 	case RMI_EXIT_IRQ:
 	case RMI_EXIT_FIQ:
 		return 1;
 	case RMI_EXIT_PSCI:
-		return rec_exit_psci(vcpu);
+		ret = rec_exit_psci(vcpu);
+		if (ret < 0)
+			kvm_err("eom: rec_exit_psci() ret %d", ret);
+		return ret;
 	case RMI_EXIT_RIPAS_CHANGE:
-		return rec_exit_ripas_change(vcpu);
+		ret = rec_exit_ripas_change(vcpu);
+		if (ret < 0)
+			kvm_err("eom: rec_exit_ripas_change() ret %d", ret);
+		return ret;
 	case RMI_EXIT_HOST_CALL:
-		return rec_exit_host_call(vcpu);
+		ret = rec_exit_host_call(vcpu);
+		if (ret < 0)
+			kvm_err("eom: rec_exit_host_call() ret %d", ret);
+		return ret; 
 	}
 
 	kvm_pr_unimpl("Unsupported exit reason: %u\n",
