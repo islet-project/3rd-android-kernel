@@ -192,6 +192,8 @@ int handle_rec_exit(struct kvm_vcpu *vcpu, int rec_run_ret)
 		ret = rec_exit_handlers[esr_ec](vcpu);
 		if (ret < 0)
 			kvm_err("eom: rec_exit_handlers() esr_ec: 0x%x, ret %d", (int)esr_ec, ret);
+			kvm_err("eom: esr_el2: 0x%llx, far_el2: 0x%llx, hpfar_el2: 0x%llx",
+					vcpu->arch.fault.esr_el2, vcpu->arch.fault.far_el2, vcpu->arch.fault.hpfar_el2);
 		return ret;
 	case RMI_EXIT_IRQ:
 	case RMI_EXIT_FIQ:
