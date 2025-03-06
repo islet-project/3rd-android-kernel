@@ -1055,9 +1055,7 @@ out_free_pgtable:
 
 void kvm_uninit_stage2_mmu(struct kvm *kvm)
 {
-	write_lock(&kvm->mmu_lock);
-	kvm_stage2_unmap_range(&kvm->arch.mmu, 0, BIT(VTCR_EL2_IPA(kvm->arch.mmu.vtcr)), true);
-	write_unlock(&kvm->mmu_lock);
+	kvm_free_stage2_pgd(&kvm->arch.mmu);
 	kvm_mmu_free_memory_cache(&kvm->arch.mmu.split_page_cache);
 }
 
