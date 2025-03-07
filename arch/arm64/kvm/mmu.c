@@ -2321,6 +2321,8 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu)
 
 		ret = kvm_walk_nested_s2(vcpu, fault_ipa, &nested_trans);
 		if (ret) {
+			if (ret == -14)
+				kvm_err("eom: kvm_walk_nested_s2 %d\n", ret);
 			esr = kvm_s2_trans_esr(&nested_trans);
 			kvm_inject_s2_fault(vcpu, esr);
 			goto out_unlock;
@@ -2328,6 +2330,8 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu)
 
 		ret = kvm_s2_handle_perm_fault(vcpu, &nested_trans);
 		if (ret) {
+			if (ret == -14)
+				kvm_err("eom: kvm_s2_handle_perm_fault %d\n", ret);
 			esr = kvm_s2_trans_esr(&nested_trans);
 			kvm_inject_s2_fault(vcpu, esr);
 			goto out_unlock;
@@ -2342,8 +2346,11 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu)
 
 	if (kvm_slot_can_be_private(memslot)) {
 		ret = private_memslot_fault(vcpu, ipa, memslot);
-		if (ret != -EINVAL)
+		if (ret != -EINVAL) {
+			if (ret == -14)
+				kvm_err("eom: private_memslot_fault %d\n", ret);
 			goto out;
+		}
 	}
 
 	write_fault = kvm_is_write_fault(vcpu);
@@ -2389,6 +2396,8 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu)
 		 */
 		ipa |= kvm_vcpu_get_hfar(vcpu) & FAR_MASK;
 		ret = io_mem_abort(vcpu, kvm_gpa_from_fault(vcpu->kvm, ipa));
+		if (ret == -14)
+			kvm_err("eom: io_mem_abort %d\n", ret);
 		goto out_unlock;
 	}
 
@@ -2401,11 +2410,16 @@ int kvm_handle_guest_abort(struct kvm_vcpu *vcpu)
 		goto out_unlock;
 	}
 
-	if (kvm_vm_is_protected(vcpu->kvm))
+	if (kvm_vm_is_protected(vcpu->kvm)) {
 		ret = pkvm_mem_abort(vcpu, &fault_ipa, memslot, NULL);
-	else
+		if (ret == -14)
+			kvm_err("eom: pkvm_mem_abort %d\n", ret);
+	} else {
 		ret = user_mem_abort(vcpu, fault_ipa, nested, memslot,
 				     esr_fsc_is_permission_fault(esr));
+		if (ret == -14)
+			kvm_err("eom: user_mem_abort %d\n", ret);
+	}
 
 	if (ret == 0)
 		ret = 1;
