@@ -1336,10 +1336,12 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 
 		if (vcpu_is_rec(vcpu)) {
 			ret = kvm_rec_enter(vcpu);
-			kvm_err("eom: kvm_rec_enter(): %d \n", ret);
+			if (ret < 0)
+				kvm_err("eom: kvm_rec_enter(): %d \n", ret);
 		} else {
 			ret = kvm_arm_vcpu_enter_exit(vcpu);
-			kvm_err("eom: kvm_arm_vcpu_enter_exit(): %d \n", ret);
+			if (ret < 0)
+				kvm_err("eom: kvm_arm_vcpu_enter_exit(): %d \n", ret);
 		}
 
 		vcpu->mode = OUTSIDE_GUEST_MODE;
@@ -1428,10 +1430,12 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 
 		if (vcpu_is_rec(vcpu)) {
 			ret = handle_rec_exit(vcpu, ret);
-			kvm_err("eom: handle_rec_exit(): %d \n", ret);
+			if (ret < 0)
+				kvm_err("eom: handle_rec_exit(): %d \n", ret);
 		} else {
 			ret = handle_exit(vcpu, ret);
-			kvm_err("eom: handle_exit(): %d \n", ret);
+			if (ret < 0)
+				kvm_err("eom: handle_exit(): %d \n", ret);
 		}
 	}
 
