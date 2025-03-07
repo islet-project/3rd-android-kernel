@@ -81,15 +81,7 @@ static inline int rmi_data_destroy(unsigned long rd, unsigned long ipa,
 {
 	struct arm_smccc_res res;
 
-	pr_err("eom: data_destroy before: rd %lx, ipa %lx", rd, ipa);
-
 	arm_smccc_1_1_invoke(SMC_RMI_DATA_DESTROY, rd, ipa, &res);
-
-	pr_err("eom: data_destroy after: rd %lx, ipa %lx, res.a1 %lx, res.a2 %lx",
-			rd, ipa, res.a1, res.a2);
-	if (ipa == 0) {
-		dump_stack();
-	}
 
 	if (data_out)
 		*data_out = res.a1;
