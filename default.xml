@@ -12,7 +12,6 @@
   <project path="common" name="kernel/common" revision="android16-6.12" >
       <linkfile src=".bazelignore" dest=".bazelignore" />
   </project>
-  <project path="kernel/configs" name="kernel/configs" revision="main" />
   <project path="kernel/tests" name="kernel/tests" revision="main" >
     <linkfile src="tools/run_test_only.sh" dest="run_test_only.sh" />
     <linkfile src="tools/launch_cvd.sh" dest="launch_cvd.sh" />
