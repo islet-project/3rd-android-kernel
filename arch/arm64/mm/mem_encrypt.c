@@ -83,6 +83,7 @@ void kvm_init_memshare_services(void)
 	memshare_granule_sz = ret;
 }
 
+#ifndef RSI_ABI_VERSION
 static int __invoke_memshare(unsigned long addr, int nr_granules, int func_id,
 			     u64 *nr_xcrypted)
 {
@@ -146,3 +147,4 @@ int set_memory_decrypted(unsigned long addr, int numpages)
 				   addr, numpages);
 }
 EXPORT_SYMBOL_GPL(set_memory_decrypted);
+#endif

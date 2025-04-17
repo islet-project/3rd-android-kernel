@@ -115,9 +115,9 @@ static inline phys_addr_t dma_to_phys(struct device *dev, dma_addr_t dma_addr)
 #endif /* !CONFIG_ARCH_HAS_PHYS_TO_DMA */
 
 #ifdef CONFIG_ARCH_HAS_FORCE_DMA_UNENCRYPTED
-bool force_dma_unencrypted(struct device *dev);
+bool force_dma_unencrypted(void *dev);
 #else
-static inline bool force_dma_unencrypted(struct device *dev)
+static inline bool force_dma_unencrypted(void *dev)
 {
 	return false;
 }

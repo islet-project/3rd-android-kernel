@@ -132,9 +132,6 @@ void __init arm64_rsi_init(void)
 	if (arm64_ioremap_prot_hook_register(realm_ioremap_hook))
 		return;
 
-	if (realm_register_memory_enc_ops())
-		return;
-
 	arm64_rsi_setup_memory();
 
 	static_branch_enable(&rsi_present);
