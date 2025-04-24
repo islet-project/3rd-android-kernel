@@ -32,7 +32,6 @@
   <project path="prebuilts/rust" name="platform/prebuilts/rust" clone-depth="1" />
   <project path="prebuilts/tradefed" name="platform/tools/tradefederation/prebuilts" revision="main" clone-depth="1" />
   <project path="prebuilts/asuite" name="platform/prebuilts/asuite" revision="main" clone-depth="1" />
-  <project path="toolchain/pgo-profiles" name="toolchain/pgo-profiles" revision="main" clone-depth="1" />
   <project path="tools/mkbootimg" name="platform/system/tools/mkbootimg" />
 
   <project path="prebuilts/jdk/jdk11" name="platform/prebuilts/jdk/jdk11" clone-depth="1" />
