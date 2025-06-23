@@ -75,6 +75,6 @@
   <project path="external/rust/android-crates-io" name="platform/external/rust/android-crates-io" />
   <project path="external/rust/crates/smoltcp" name="platform/external/rust/crates/smoltcp" />
   <project path="external/rust/crates/zune-inflate" name="platform/external/rust/crates/zune-inflate" />
-  <project path="prebuilts/fuchsia_sdk" name="platform/prebuilts/fuchsia_sdk" clone-depth="1" />
+  <project path="prebuilts/fuchsia_sdk" name="platform/prebuilts/fuchsia_sdk" clone-depth="1" revision="gbl-android16"/>
   <project path="system/core" name="platform/system/core" />
 </manifest>
