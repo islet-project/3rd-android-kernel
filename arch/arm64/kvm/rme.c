@@ -12,6 +12,9 @@
 #include <asm/virt.h>
 
 #include <asm/kvm_pgtable.h>
+// Below for storing and restoring the host context
+#include <asm/sysreg.h>
+#include <hyp/include/hyp/sysreg-sr.h>
 
 static unsigned long rmm_feat_reg0;
 
@@ -1419,6 +1422,46 @@ void kvm_destroy_realm(struct kvm *kvm)
 	kvm_free_stage2_pgd(&kvm->arch.mmu);
 }
 
+static bool save_host_context = false;
+static void save_host_state(struct kvm_cpu_context *host_ctxt)
+{
+    if (!save_host_context) {
+        return;
+    }
+    __sysreg_save_el1_state(host_ctxt);
+    __sysreg_save_common_state(host_ctxt);
+    __sysreg_save_user_state(host_ctxt);
+    ctxt_sys_reg(host_ctxt, CNTP_CTL_EL0) = read_sysreg(cntp_ctl_el0);
+    ctxt_sys_reg(host_ctxt, CNTV_CTL_EL0) = read_sysreg(cntv_ctl_el0);
+    ctxt_sys_reg(host_ctxt, CNTP_CVAL_EL0) = read_sysreg(cntp_cval_el0);
+    ctxt_sys_reg(host_ctxt, CNTV_CVAL_EL0) = read_sysreg(cntv_cval_el0);
+}
+
+static void restore_host_state(struct kvm_cpu_context *host_ctxt)
+{
+    if (!save_host_context) {
+        return;
+    }
+    __sysreg_restore_el1_state(host_ctxt);
+    __sysreg_restore_common_state(host_ctxt);
+    __sysreg_restore_user_state(host_ctxt);
+    write_sysreg(ctxt_sys_reg(host_ctxt, CNTP_CTL_EL0), cntp_ctl_el0);
+    write_sysreg(ctxt_sys_reg(host_ctxt, CNTV_CTL_EL0), cntv_ctl_el0);
+    write_sysreg(ctxt_sys_reg(host_ctxt, CNTP_CVAL_EL0), cntp_cval_el0);
+    write_sysreg(ctxt_sys_reg(host_ctxt, CNTV_CVAL_EL0), cntv_cval_el0);
+}
+
+static int __init early_rmm_cfg(char *arg)
+{
+    if (!arg)
+        return 0;
+    if (strcmp(arg, "true") == 0 || strcmp(arg, "1") == 0 ) {
+        save_host_context = true;
+    }
+    return 0;
+}
+early_param("kvm-rme.save_host_context", early_rmm_cfg);
+
 int kvm_rec_enter(struct kvm_vcpu *vcpu)
 {
 	struct realm_rec *rec = &vcpu->arch.rec;
@@ -1434,8 +1477,17 @@ int kvm_rec_enter(struct kvm_vcpu *vcpu)
 	if (kvm_realm_state(vcpu->kvm) != REALM_STATE_ACTIVE)
 		return -EINVAL;
 
+#if 0
 	return rmi_rec_enter(virt_to_phys(rec->rec_page),
 			     virt_to_phys(rec->run));
+#else
+    struct kvm_cpu_context *host_ctxt = host_data_ptr(host_ctxt);
+    save_host_state(host_ctxt);
+    int ret = rmi_rec_enter(virt_to_phys(rec->rec_page),
+			     virt_to_phys(rec->run));
+    restore_host_state(host_ctxt);
+    return ret;
+#endif
 }
 
 static void free_rec_aux(struct page **aux_pages,
