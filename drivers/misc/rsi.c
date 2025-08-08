@@ -418,6 +418,7 @@ static long device_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 		ret = do_version(&version);
 		if (ret != 0) {
 			printk(RSI_ALERT "ioctl: version failed: %d\n", ret);
+			return ret;
 		}
 		ret = copy_to_user((uint64_t*)arg, &version, sizeof(uint64_t));
 		if (ret != 0) {
