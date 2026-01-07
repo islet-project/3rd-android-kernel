@@ -10,6 +10,8 @@
 #endif
 #define RSI_ABI_VERSION_SET(_major, _minor) (((_major) << 16) | (_minor))
 
+#define RSI_HASH_SHA_256 0
+#define RSI_HASH_SHA_512 1
 
 #define MAX_MEASUR_LEN  0x40
 #define CHALLENGE_LEN   0x40
@@ -62,6 +64,12 @@ struct rsi_realm_metadata
 	uint8_t metadata[GRANULE_LEN];
 };
 
+struct rsi_realm_config {
+	uint32_t ipa_bits; /* Width of IPA in bits */
+	uint32_t hash_algo; /* Hash algorithm */
+	uint8_t rpv[64]; /* Realm Personalization Value */
+};
+
 // TODO: These should be hex
 #define RSIIO_ABI_VERSION          _IOR('x', 190, uint64_t /*version*/)
 #define RSIIO_MEASUREMENT_READ     _IOWR('x', 192, struct rsi_measurement)
@@ -69,3 +77,4 @@ struct rsi_realm_metadata
 #define RSIIO_ATTESTATION_TOKEN    _IOWR('x', 194, struct rsi_attestation)
 #define RSIIO_SEALING_KEY          _IOWR('x', 200, struct rsi_sealing_key)
 #define RSIIO_REALM_METADATA       _IOR('x', 201, struct rsi_realm_metadata)
+#define RSIIO_REALM_CONFIG         _IOR('x', 202, struct rsi_realm_config)

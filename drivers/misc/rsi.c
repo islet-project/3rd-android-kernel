@@ -30,6 +30,8 @@ MODULE_DESCRIPTION("Linux RSI playground");
 
 #define DEVICE_NAME       "rsi"       /* Name of device in /proc/devices */
 
+static struct rsi_realm_config realm_cfg;
+
 static int device_major;              /* Major number assigned to our device driver */
 static int device_open_count = 0;     /* Used to prevent multiple open */
 static struct class *cls;
@@ -108,6 +110,12 @@ static void rsi_playground(void)
 	ret = rsi_get_realm_config(config);
 	printk(RSI_INFO "RSI config, ret: %s, ipa_width_in_bits: %lu\n",
 	       rsi_ret_to_str(ret), config->ipa_bits);
+
+	// keep the cached copy of Realm Config for the purpose of RSIIO_REALM_CONFIG ioctl handling
+	realm_cfg.ipa_bits = config->ipa_bits;
+	realm_cfg.hash_algo = config->hash_algo;
+	memcpy(&realm_cfg.rpv, config->rpv, sizeof(realm_cfg.rpv));
+
 	__free_page(config_page);
 }
 
@@ -550,6 +558,13 @@ static long device_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 		}
 
 		ret = copy_to_user((struct rsi_realm_metadata*)arg, metadata, sizeof(struct rsi_realm_metadata));
+		if (ret != 0) {
+			printk(RSI_ALERT "ioctl: copy_to_user failed: %d\n", ret);
+			goto end;
+		}
+		break;
+	case RSIIO_REALM_CONFIG:
+		ret = copy_to_user((struct rsi_realm_config*)arg, &realm_cfg, sizeof(struct rsi_realm_config));
 		if (ret != 0) {
 			printk(RSI_ALERT "ioctl: copy_to_user failed: %d\n", ret);
 			goto end;
